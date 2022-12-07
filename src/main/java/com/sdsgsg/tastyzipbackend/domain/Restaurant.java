@@ -20,7 +20,7 @@ public class Restaurant {
 	@Column(name = "restaurant_id")
 	private Long id;
 
-	public String location;
+	private String location;
 
 	private String name;
 
