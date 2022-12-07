@@ -20,11 +20,14 @@ public class Restaurant {
 	@Column(name = "restaurant_id")
 	private Long id;
 
-	private String location;
-
 	private String name;
 
 	private String category;
+
+	private String address;
+
+	private Double lat;
+	private Double lon;
 
 	@OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
 	private List<Review> reviews;
