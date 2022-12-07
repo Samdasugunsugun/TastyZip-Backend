@@ -29,6 +29,8 @@ public class Restaurant {
 	private Double lat;
 	private Double lon;
 
+	private Double score;
+
 	@OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
 	private List<Review> reviews;
 }

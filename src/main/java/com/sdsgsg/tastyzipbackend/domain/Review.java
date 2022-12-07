@@ -30,8 +30,6 @@ public class Review {
 
 	private Double score;
 
-	private Double poscore;
-
 	@OneToMany(mappedBy = "review")
 	private List<Connect> connect;
 }
