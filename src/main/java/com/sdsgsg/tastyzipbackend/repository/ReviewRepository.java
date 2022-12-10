@@ -8,6 +8,5 @@ import com.sdsgsg.tastyzipbackend.domain.Restaurant;
 import com.sdsgsg.tastyzipbackend.domain.Review;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-
-	public List<Review> findByRestaurant(Restaurant restaurant);
+	List<Review> findByRestaurant(Restaurant restaurant);
 }

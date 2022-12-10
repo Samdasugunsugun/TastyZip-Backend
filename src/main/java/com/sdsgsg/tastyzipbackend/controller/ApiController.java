@@ -28,7 +28,7 @@ public class ApiController {
 
 	@GetMapping("/search")
 	public ResponseEntity<List<RestaurantDetailsDto>> getSearchResult(@RequestParam String query) {
-		List<RestaurantDetailsDto> searchResults = restaurantService.searchResult(query);
+		List<RestaurantDetailsDto> searchResults = restaurantService.searchRestaurants(query);
 		return ResponseEntity.ok(searchResults);
 	}
 

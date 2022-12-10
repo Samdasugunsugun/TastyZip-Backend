@@ -10,4 +10,5 @@ import com.sdsgsg.tastyzipbackend.domain.Restaurant;
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
 	@Query("select r from Restaurant r join fetch r.reviews ")
 	List<Restaurant> findAllRestaurantReviews();
+
 }
