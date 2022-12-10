@@ -34,5 +34,5 @@ public class Review {
 	private Double score;
 
 	@OneToMany(mappedBy = "review")
-	private List<Connect> connect;
+	private List<Connect> connects;
 }

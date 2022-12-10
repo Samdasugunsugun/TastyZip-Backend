@@ -26,5 +26,5 @@ public class Keyword {
 	private String keyword;
 
 	@OneToMany(mappedBy = "keyword", cascade = CascadeType.ALL)
-	private List<Connect> connect;
+	private List<Connect> connects;
 }

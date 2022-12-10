@@ -22,7 +22,7 @@ public class ReviewDto {
 	public static ReviewDto fromEntity(Review review) {
 		return builder()
 			.content(review.getContent())
-			.rating(0.0)
+			.rating(review.getScore())
 			.build();
 	}
 }
