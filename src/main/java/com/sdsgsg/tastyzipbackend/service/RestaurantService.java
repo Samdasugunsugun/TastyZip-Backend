@@ -30,9 +30,6 @@ public class RestaurantService {
 
 	public List<RestaurantDetailsDto> searchRestaurants(String searchKeyword) {
 		List<String> keywords = keywordExtraction(searchKeyword);
-		System.out.println("===========================================");
-		System.out.println(keywords.toString());
-		System.out.println("===========================================");
 
 		HashMap<Restaurant, Long> searchMap = countKeyword(keywords);
 
@@ -44,9 +41,13 @@ public class RestaurantService {
 			return searchMap.get(o2).compareTo(searchMap.get(o1));
 		});
 
-		return keySet.stream()
+		List<RestaurantDetailsDto> results = keySet.stream()
 			.map(RestaurantDetailsDto::fromEntity)
 			.collect(Collectors.toList());
+		if (results.size() > 50) {
+			results = results.subList(0, 50);
+		}
+		return results;
 	}
 
 	private HashMap<Restaurant, Long> countKeyword(List<String> keywords) {
