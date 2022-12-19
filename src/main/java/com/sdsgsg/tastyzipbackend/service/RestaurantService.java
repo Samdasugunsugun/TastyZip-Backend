@@ -12,11 +12,9 @@ import org.openkoreantext.processor.tokenizer.KoreanTokenizer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sdsgsg.tastyzipbackend.domain.Keyword;
 import com.sdsgsg.tastyzipbackend.domain.Restaurant;
 import com.sdsgsg.tastyzipbackend.domain.Review;
 import com.sdsgsg.tastyzipbackend.dto.RestaurantDetailsDto;
-import com.sdsgsg.tastyzipbackend.repository.KeywordRepository;
 import com.sdsgsg.tastyzipbackend.repository.RestaurantRepository;
 import com.sdsgsg.tastyzipbackend.repository.ReviewRepository;
 
@@ -29,38 +27,41 @@ import scala.collection.Seq;
 public class RestaurantService {
 	private final RestaurantRepository restaurantRepository;
 	private final ReviewRepository reviewRepository;
-	private final KeywordRepository keywordRepository;
 
 	public List<RestaurantDetailsDto> searchRestaurants(String searchKeyword) {
 		List<String> keywords = keywordExtraction(searchKeyword);
+		System.out.println("===========================================");
+		System.out.println(keywords.toString());
+		System.out.println("===========================================");
 
-		List<Restaurant> restaurants = restaurantRepository.findAllRestaurantReviews();
-		HashMap<Restaurant, Long> searchMap = countKeyword(restaurants, keywords);
+		HashMap<Restaurant, Long> searchMap = countKeyword(keywords);
 
 		List<Restaurant> keySet = new ArrayList<>(searchMap.keySet());
-		keySet.sort((o1, o2) -> searchMap.get(o2).compareTo(searchMap.get(o1)));
+		keySet.sort((o1, o2) -> {
+			if (searchMap.get(o2).compareTo(searchMap.get(o1)) == 0) {
+				return o2.getScore().compareTo(o1.getScore());
+			}
+			return searchMap.get(o2).compareTo(searchMap.get(o1));
+		});
 
 		return keySet.stream()
 			.map(RestaurantDetailsDto::fromEntity)
 			.collect(Collectors.toList());
 	}
 
-	private HashMap<Restaurant, Long> countKeyword(List<Restaurant> restaurantList, List<String> keywords) {
+	private HashMap<Restaurant, Long> countKeyword(List<String> keywords) {
 		HashMap<Restaurant, Long> searchMap = new HashMap<>();
 
-		for (Restaurant restaurant : restaurantList) {
-			long count = 0L;
-			List<Review> reviews = reviewRepository.findByRestaurant(restaurant);
-			for (Review review : reviews) {
-				List<String> reviewKeywords = keywordRepository.findByReview(review).stream()
-					.map(Keyword::getKeyword)
-					.collect(Collectors.toList());
-				reviewKeywords.retainAll(keywords);
-				count += reviewKeywords.size();
-			}
+		for (String keyword : keywords) {
+			List<Review> byKeyword = reviewRepository.findReviewsByKeyword(keyword);
 
-			if (count > 0) {
-				searchMap.put(restaurant, count);
+			for (Review review : byKeyword) {
+				Restaurant restaurant = review.getRestaurant();
+				if (searchMap.containsKey(restaurant)) {
+					searchMap.put(restaurant, searchMap.get(restaurant) + 1);
+				} else {
+					searchMap.put(restaurant, 1L);
+				}
 			}
 		}
 
