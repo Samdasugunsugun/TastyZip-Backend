@@ -13,10 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sdsgsg.tastyzipbackend.domain.Restaurant;
-import com.sdsgsg.tastyzipbackend.domain.Review;
 import com.sdsgsg.tastyzipbackend.dto.RestaurantDetailsDto;
+import com.sdsgsg.tastyzipbackend.dto.SearchResultDto;
 import com.sdsgsg.tastyzipbackend.repository.RestaurantRepository;
-import com.sdsgsg.tastyzipbackend.repository.ReviewRepository;
+import com.sdsgsg.tastyzipbackend.repository.SearchQueryRepository;
 
 import lombok.RequiredArgsConstructor;
 import scala.collection.Seq;
@@ -26,7 +26,7 @@ import scala.collection.Seq;
 @Transactional(readOnly = true)
 public class RestaurantService {
 	private final RestaurantRepository restaurantRepository;
-	private final ReviewRepository reviewRepository;
+	private final SearchQueryRepository searchQueryRepository;
 
 	public List<RestaurantDetailsDto> searchRestaurants(String searchKeyword) {
 		List<String> keywords = keywordExtraction(searchKeyword);
@@ -41,30 +41,21 @@ public class RestaurantService {
 			return searchMap.get(o2).compareTo(searchMap.get(o1));
 		});
 
-		List<RestaurantDetailsDto> results = keySet.stream()
+		int maxSize = 50;
+		if (keySet.size() > maxSize) {
+			keySet = keySet.subList(0, maxSize);
+		}
+
+		return keySet.stream()
 			.map(RestaurantDetailsDto::fromEntity)
 			.collect(Collectors.toList());
-		if (results.size() > 50) {
-			results = results.subList(0, 50);
-		}
-		return results;
 	}
 
 	private HashMap<Restaurant, Long> countKeyword(List<String> keywords) {
 		HashMap<Restaurant, Long> searchMap = new HashMap<>();
 
-		for (String keyword : keywords) {
-			List<Review> byKeyword = reviewRepository.findReviewsByKeyword(keyword);
-
-			for (Review review : byKeyword) {
-				Restaurant restaurant = review.getRestaurant();
-				if (searchMap.containsKey(restaurant)) {
-					searchMap.put(restaurant, searchMap.get(restaurant) + 1);
-				} else {
-					searchMap.put(restaurant, 1L);
-				}
-			}
-		}
+		List<SearchResultDto> byKeyword = searchQueryRepository.findByKeywords(keywords);
+		byKeyword.forEach(o -> searchMap.put(o.getRestaurant(), o.getCount()));
 
 		return searchMap;
 	}
